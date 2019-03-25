@@ -30,7 +30,7 @@
                             <td>{{ user.type | upText }}</td>
                             <td>{{ user.created_at | myDate }}</td>
                             <td>
-                                <a href="#" @click="">
+                                <a href="#" @click="editModal(user);">
                                     <i class="fa fa-edit blue"></i>
                                 </a>
                                 /
@@ -53,12 +53,13 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add New</h5>
+                <h5 class="modal-title" id="exampleModalLabel" v-show="!editmode">Add New</h5>
+                <h5 class="modal-title" id="exampleModalLabel" v-show="editmode">Update User's Info New</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
                 </div>
-                <form @submit.prevent="createUser">
+                <form @submit.prevent="updatemode ? updateUser() : createUser()">
                 <div class="modal-body">
                         <div class="form-group">
                             <input v-model="form.name" type="text" name="name" id="name"
@@ -98,7 +99,8 @@
                 </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button v-show="editmode" type="submit" class="btn btn-success">Update</button>
+                <button v-show="!editmode" type="submit" class="btn btn-primary">Create</button>
                 </div>
                 </form>
             </div>
@@ -110,8 +112,10 @@
 
 <script>
     export default {
-        data(){
-            return {
+        data()
+        {
+            return  {
+                editmode: false,
                 users : {},
                 form: new Form({
                     name: '',
@@ -124,11 +128,25 @@
             }
         },
         methods: {
-            newModal(){
+            updateUser()
+            {
+                this.editmode = true;
+            },
+            editModal(user)
+            {
+                this.editmode = true;
+                this.form.reset();
+                $('#addNewModal').modal('show');
+                this.form.fill(user);
+            },
+            newModal()
+            {
+                this.editmode = false;
                 this.form.reset();
                 $('#addNewModal').modal('show');
             },
-            deleteUser(id){
+            deleteUser(id)
+            {
                 
                 swal.fire({
                     title: 'Are you sure?',
@@ -152,10 +170,12 @@
                         }
                     })
             },
-            loadUsers(){
+            loadUsers()
+            {
                 axios.get("api/user").then(({ data }) => (this.users = data.data));
             },
-            createUser() {
+            createUser() 
+            {
                 this.$Progress.start();
                 
                 this.form.post('api/user')
@@ -176,7 +196,8 @@
                 
             }
         },
-        created() {
+        created() 
+        {
             this.loadUsers();
             // 1 Old way
             // setInterval(() => this.loadUsers() , 3000);
