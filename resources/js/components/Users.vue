@@ -54,12 +54,12 @@
             <div class="modal-content">
                 <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel" v-show="!editmode">Add New</h5>
-                <h5 class="modal-title" id="exampleModalLabel" v-show="editmode">Update User's Info New</h5>
+                <h5 class="modal-title" id="exampleModalLabel" v-show="editmode">Update User's Info</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
                 </div>
-                <form @submit.prevent="updatemode ? updateUser() : createUser()">
+                <form @submit.prevent="editmode ? updateUser() : createUser()">
                 <div class="modal-body">
                         <div class="form-group">
                             <input v-model="form.name" type="text" name="name" id="name"
@@ -118,6 +118,7 @@
                 editmode: false,
                 users : {},
                 form: new Form({
+                    id: '',
                     name: '',
                     email: '',
                     password: '',
@@ -130,7 +131,26 @@
         methods: {
             updateUser()
             {
-                this.editmode = true;
+                // console.log('Editing data');
+
+                this.$Progress.start();
+
+                this.form.put('api/user/'+this.form.id)
+                .then(() => {
+                    // success
+                    $('#addNewModal').modal('hide');
+                    swal.fire(
+                        'Updated!',
+                        'Information has been updated.',
+                        'success'
+                    );
+                    Fire.$emit('AfterCreate');
+                    this.$Progress.finish();
+                })
+                .catch(() => {
+                    this.$Progress.fail();
+                });
+
             },
             editModal(user)
             {
@@ -147,7 +167,6 @@
             },
             deleteUser(id)
             {
-                
                 swal.fire({
                     title: 'Are you sure?',
                     text: "You won't be able to revert this!",

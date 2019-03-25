@@ -1997,6 +1997,7 @@ __webpack_require__.r(__webpack_exports__);
       editmode: false,
       users: {},
       form: new Form({
+        id: '',
         name: '',
         email: '',
         password: '',
@@ -2008,7 +2009,20 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     updateUser: function updateUser() {
-      this.editmode = true;
+      var _this = this;
+
+      // console.log('Editing data');
+      this.$Progress.start();
+      this.form.put('api/user/' + this.form.id).then(function () {
+        // success
+        $('#addNewModal').modal('hide');
+        swal.fire('Updated!', 'Information has been updated.', 'success');
+        Fire.$emit('AfterCreate');
+
+        _this.$Progress.finish();
+      }).catch(function () {
+        _this.$Progress.fail();
+      });
     },
     editModal: function editModal(user) {
       this.editmode = true;
@@ -2022,7 +2036,7 @@ __webpack_require__.r(__webpack_exports__);
       $('#addNewModal').modal('show');
     },
     deleteUser: function deleteUser(id) {
-      var _this = this;
+      var _this2 = this;
 
       swal.fire({
         title: 'Are you sure?',
@@ -2035,7 +2049,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (result) {
         // Send request to the server
         if (result.value) {
-          _this.form.delete('api/user/' + id).then(function () {
+          _this2.form.delete('api/user/' + id).then(function () {
             swal.fire('Deleted!', 'Your file has been deleted.', 'success');
             Fire.$emit('AfterCreate');
           }).catch(function () {
@@ -2045,15 +2059,15 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     loadUsers: function loadUsers() {
-      var _this2 = this;
+      var _this3 = this;
 
       axios.get("api/user").then(function (_ref) {
         var data = _ref.data;
-        return _this2.users = data.data;
+        return _this3.users = data.data;
       });
     },
     createUser: function createUser() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.$Progress.start();
       this.form.post('api/user').then(function () {
@@ -2064,21 +2078,21 @@ __webpack_require__.r(__webpack_exports__);
           title: 'User Created successfully'
         });
 
-        _this3.$Progress.finish();
+        _this4.$Progress.finish();
       }).catch(function () {
-        _this3.$Progress.fail();
+        _this4.$Progress.fail();
       });
     }
   },
   created: function created() {
-    var _this4 = this;
+    var _this5 = this;
 
     this.loadUsers(); // 1 Old way
     // setInterval(() => this.loadUsers() , 3000);
     // 2 Component Communication
 
     Fire.$on('AfterCreate', function () {
-      _this4.loadUsers();
+      _this5.loadUsers();
     });
   }
 });
@@ -58587,7 +58601,7 @@ var render = function() {
                     staticClass: "modal-title",
                     attrs: { id: "exampleModalLabel" }
                   },
-                  [_vm._v("Update User's Info New")]
+                  [_vm._v("Update User's Info")]
                 ),
                 _vm._v(" "),
                 _vm._m(1)
@@ -58599,7 +58613,7 @@ var render = function() {
                   on: {
                     submit: function($event) {
                       $event.preventDefault()
-                      _vm.updatemode ? _vm.updateUser() : _vm.createUser()
+                      _vm.editmode ? _vm.updateUser() : _vm.createUser()
                     }
                   }
                 },
